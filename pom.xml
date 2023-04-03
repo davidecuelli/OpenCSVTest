@@ -11,6 +11,12 @@
             <artifactId>opencsv</artifactId>
             <version>5.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <groupId>org.example</groupId>

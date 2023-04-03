@@ -2,6 +2,7 @@ package org.example;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileReader;
@@ -14,11 +15,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-public class Main {
+public class Gestore {
 
-    private static int caricoDiLavoro = 1; // inizializzato a 1, può essere modificato
-    private int posti = 50; // inizializzo i posti a sedere del Ristorante
-    private double caricoSostenibileRistorante = caricoDiLavoro*posti*1.2;
+    private static int caricoDiLavoro = 30; // inizializzato a 1, può essere modificato
+    public static int posti = 50; // inizializzo i posti a sedere del Ristorante
+    public static double caricoSostenibileRistorante = caricoDiLavoro*posti*1.2;
+
+    public static double getCdlPiatto(String nome) {
+        try (CSVReader reader = new CSVReader(new FileReader("piatti.csv"))) {
+            String[] intestazione = reader.readNext();
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                if(nome.equals(riga[0])) return Double.parseDouble(riga[2]);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
+
+    public static double getCdlMenu(String nome) {
+        try (CSVReader reader = new CSVReader(new FileReader("menutematici.csv"))) {
+            String[] intestazione = reader.readNext();
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                if(nome.equals(riga[0])) return Double.parseDouble(riga[2]);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
 
     public void modificaCaricoDiLavoro() {
         Scanner scanner = new Scanner(System.in);
@@ -37,10 +64,8 @@ public class Main {
     public static void inserisciIngrediente(String nome, String misura){
         // scrittura (nel fileWriter oltre al filePath aggiungo un true che permette di fare Append e non sovrascrivere
         try(CSVWriter writer = new CSVWriter(new FileWriter("ingredienti.csv", true))){
-
             String[] row1 = {nome, misura};
             writer.writeNext(row1, false);
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -310,7 +335,47 @@ public class Main {
         }
     }
 
-    public static Piatto getPiatto(String x){
+    public static void visualizzaPiattiDisponibili(String x){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate data = LocalDate.parse(x, formatter); // converto da stringa a oggetto LocalDate
+        String output="";
+        try (CSVReader reader = new CSVReader(new FileReader("piatti.csv"))) {
+            List<Piatto> listaPiatti = new ArrayList<>();
+            String[] intestazione = reader.readNext(); // Leggi la prima riga (intestazione)
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                // controllo dataInizio e fine se non è presente stampo diretto.
+                // Altrimenti controllo che il parametro data convertito in LocalDate sia compreso tra data inizio fine
+                if(riga[3].equals("") || riga[4].equals("")){
+                    output+=riga[0]+"\n";
+                } else {
+                    LocalDate dataInizio = LocalDate.parse(riga[3], formatter);
+                    LocalDate dataFine = LocalDate.parse(riga[4], formatter);
+                    if(data.isAfter(dataInizio) && data.isBefore(dataFine)){
+                        output+=riga[0]+"\n";
+                    }
+                }
+            }
+            System.out.print(output);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean cercaPiatto(String x){
+        try (CSVReader reader = new CSVReader(new FileReader("piatti.csv"))) {
+            String[] intestazione = reader.readNext();
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                if(x.equals(riga[0])) return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static @Nullable Piatto getPiatto(String x){
 
         try (CSVReader reader = new CSVReader(new FileReader("piatti.csv"))) {
 
@@ -406,10 +471,123 @@ public class Main {
         }
     }
 
+    public static void visualizzaMenuTematici(String x){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate data = LocalDate.parse(x, formatter); // converto da stringa a oggetto LocalDate
+        String output="";
+        try (CSVReader reader = new CSVReader(new FileReader("menutematici.csv"))) {
+            List<MenuTematico> listaMenu = new ArrayList<>();
+            String[] intestazione = reader.readNext(); // Leggi la prima riga (intestazione)
+            String[] riga; // Leggi le righe successive (dati)
+            while ((riga = reader.readNext()) != null) {
+                // controllo dataInizio e fine se non è presente stampo diretto.
+                // Altrimenti controllo che il parametro data convertito in LocalDate sia compreso tra data inizio fine
+                if(riga[3].equals("") || riga[4].equals("")){
+                    output+=riga[0]+"\n";
+                } else {
+                    LocalDate dataInizio = LocalDate.parse(riga[3], formatter);
+                    LocalDate dataFine = LocalDate.parse(riga[4], formatter);
+                    if(data.isAfter(dataInizio) && data.isBefore(dataFine)){
+                        output+=riga[0]+"\n";
+                    }
+                }
+            }
+            System.out.print(output);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean cercaMenuTematico(String x){
+        try (CSVReader reader = new CSVReader(new FileReader("menutematici.csv"))) {
+            String[] intestazione = reader.readNext();
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                if(x.equals(riga[0])) return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private static void inserisciBevanda(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Come vuoi chiamare la bevande? ");
+        String nome = scanner.next();
+        System.out.print("Qual è il consumo pro capite della bevanda? (in litri) ");
+        double consumoProCapite = scanner.nextDouble();
+        try(CSVWriter writer = new CSVWriter(new FileWriter("bevande.csv", true))){
+
+            String[] row1 = {nome, consumoProCapite+""};
+            writer.writeNext(row1, false);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void visualizzaBevande(){
+        try (CSVReader reader = new CSVReader(new FileReader("bevande.csv"))) {
+            List<Bevanda> listaBevande = new ArrayList<>();
+            // Leggi la prima riga (intestazione)
+            String[] intestazione = reader.readNext();
+            // Leggi le righe successive (dati)
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                Bevanda bevanda = new Bevanda();
+                bevanda.setNome(riga[0]);
+                bevanda.setConsumoProCapite(Double.parseDouble(riga[1]));
+                listaBevande.add(bevanda);
+            }
+            for (Bevanda bevanda : listaBevande) {
+                System.out.println(bevanda);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void inserisciGenereExtra(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Come vuoi chiamare il genere extra? ");
+        String nome = scanner.next();
+        System.out.print("Qual è il consumo pro capite del genere extra? (in ettogrammi) ");
+        double consumoProCapite = scanner.nextDouble();
+        try(CSVWriter writer = new CSVWriter(new FileWriter("generiextra.csv", true))){
+
+            String[] row1 = {nome, consumoProCapite+""};
+            writer.writeNext(row1, false);
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void visualizzaGenereExtra(){
+        try (CSVReader reader = new CSVReader(new FileReader("generiextra.csv"))) {
+            List<GenereExtra> listaGeneriExtra = new ArrayList<>();
+            // Leggi la prima riga (intestazione)
+            String[] intestazione = reader.readNext();
+            // Leggi le righe successive (dati)
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                GenereExtra genereExtra = new GenereExtra();
+                genereExtra.setNome(riga[0]);
+                genereExtra.setConsumoProCapite(Double.parseDouble(riga[1]));
+                listaGeneriExtra.add(genereExtra);
+            }
+            for (GenereExtra genereExtra : listaGeneriExtra) {
+                System.out.println(genereExtra);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-
 
         System.out.println("GESTORE");
 
@@ -421,7 +599,15 @@ public class Main {
 
         //visualizzaPiattiDisponibili();
 
-        creaMenuTematico();
+        //creaMenuTematico();
+
+        //inserisciBevanda();
+
+        //inserisciGenereExtra();
+
+        visualizzaBevande();
+
+        //visualizzaGenereExtra();
 
     }
 

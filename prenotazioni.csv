@@ -1,0 +1,4 @@
+numeroCoperti,data,richiesta,caricoDiLavoro
+1,03/04/2023,{teest=1},2.0
+1,08/04/2023,{teest=1},2.0
+4,03/04/2023,"{pizza=3, teest=3}",3.0
