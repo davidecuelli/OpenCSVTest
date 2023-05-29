@@ -111,6 +111,25 @@ public class AddettoPrenotazioni {
         return listaPrenotazioni;
     }
 
+    public static int getCopertiDelGiorno() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        int coperti = 0;
+        try (CSVReader reader = new CSVReader(new FileReader("prenotazioni.csv"))) {
+            String[] intestazione = reader.readNext();
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                LocalDate dataChek = LocalDate.parse(riga[1], formatter);
+                LocalDate now = LocalDate.now();
+                if (dataChek.equals(now)){
+                   coperti+=Integer.parseInt(riga[0]);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return coperti;
+    }
+
     // prendo in input la data della prenotazione e il numero di coperti, controllo il numero di coperti occupati
     // già per quella data e se c'è posto anche per la nuova prenotazione ritorna true altrimenti falso.
     private static boolean checkPostiPrenotazioni(String d, int x){
@@ -188,5 +207,6 @@ public class AddettoPrenotazioni {
         rimozionePrenotazioniPassate();
 
     }
+
 
 }

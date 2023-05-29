@@ -1,3 +1,7 @@
 nome,consumoProCapite
-acqua,0.5
+acqua naturale,0.5
+acqua frizzante,0.5
 cocacola,0.33
+vino bianco,0.2
+vino rosso,0.2
+spumante,0.2

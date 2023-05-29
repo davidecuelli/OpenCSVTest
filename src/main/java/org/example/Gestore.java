@@ -10,10 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Gestore {
 
@@ -45,6 +42,23 @@ public class Gestore {
             e.printStackTrace();
         }
         return 0.0;
+    }
+
+    public static List<String> getListaPiattiMenu(String nome) {
+        List<String> list = null;
+        try (CSVReader reader = new CSVReader(new FileReader("menutematici.csv"))) {
+            String[] intestazione = reader.readNext();
+            String[] riga;
+            while ((riga = reader.readNext()) != null) {
+                if(nome.equals(riga[0])) {
+                    String[] array = riga[1].split("\\+");
+                    list = Arrays.asList(array);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     public void modificaCaricoDiLavoro() {
